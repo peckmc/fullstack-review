@@ -9,10 +9,14 @@ let repoSchema = mongoose.Schema({
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = (repos) => {
-  // This function should save a repo or repos to
-  // the MongoDB
-  forEach()
+let save = async (repos) => {
+  for (const repo of repos) {
+    var dupeExists = await Repo.exists({ html_url: repo.html_url });
+    if(!dupeExists) {
+      const repoObj = { name: repo.name, url: repo.html_url, watchers_count: repo.watchers_count }
+      await Repo.create({ repoObj });
+    }
+  }
 }
 
-module.exports.save = save;
+module.exports = save;
