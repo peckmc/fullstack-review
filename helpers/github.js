@@ -15,13 +15,17 @@ let getReposByUsername = (username) => {
     }
   };
 
-  axios.get(options)
-  .then(userData => {
-    return userData;
-  })
-  .catch(error => {
-    console.log(error);
-  })
+  const axiosReq = new Promise(function(resolve, reject) {
+    axios.get(options.url, options.headers)
+    .then(userData => {
+      resolve(userData);
+    })
+    .catch(err => {
+      console.log('axios err', err);
+    })
+  });
+
+  return axiosReq;
 }
 
 module.exports.getReposByUsername = getReposByUsername;

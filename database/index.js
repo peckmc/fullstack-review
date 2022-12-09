@@ -10,7 +10,8 @@ let repoSchema = mongoose.Schema({
 let Repo = mongoose.model('Repo', repoSchema);
 
 let save = async (repos) => {
-  for (const repo of repos) {
+  console.log('adding repos to db', repos.data);
+  for (const repo of repos.data) {
     var dupeExists = await Repo.exists({ html_url: repo.html_url });
     if(!dupeExists) {
       const repoObj = { name: repo.name, url: repo.html_url, watchers_count: repo.watchers_count }
@@ -19,4 +20,4 @@ let save = async (repos) => {
   }
 }
 
-module.exports = save;
+module.exports.save = save;
