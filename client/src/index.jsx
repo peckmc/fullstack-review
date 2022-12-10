@@ -13,7 +13,6 @@ class App extends React.Component {
   }
 
   search (term) {
-    console.log(`${term} was searched`);
     $.ajax({
       type: 'POST',
       contentType: 'application/json',

@@ -4,20 +4,26 @@ mongoose.connect('mongodb://localhost/fetcher');
 let repoSchema = mongoose.Schema({
   name: String,
   html_url: String,
-  watchers_count: Number
+  forks: Number
 });
 
 let Repo = mongoose.model('Repo', repoSchema);
 
 let save = async (repos) => {
-  console.log('adding repos to db', repos.data);
-  for (const repo of repos.data) {
-    var dupeExists = await Repo.exists({ html_url: repo.html_url });
+  await Repo.deleteMany({});
+  for (const repo of repos) {
+    const dupeExists = await Repo.exists({ html_url: repo.html_url }).exec();
     if(!dupeExists) {
-      const repoObj = { name: repo.name, url: repo.html_url, watchers_count: repo.watchers_count }
-      await Repo.create({ repoObj });
+      const repoObj = { name: repo.name, url: repo.html_url, forks: repo.forks };
+      await Repo.create(repoObj);
     }
   }
 }
 
+let getTop25 = async () => {
+  var results = await Repo.find().limit(25).sort('-forks').exec();
+  return results;
+}
+
 module.exports.save = save;
+module.exports.getTop25 = getTop25;
