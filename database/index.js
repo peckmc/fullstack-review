@@ -17,7 +17,6 @@ let save = (repos) => {
         Repo.exists({ html_url: repo.html_url }).exec()
         .then(dupeExists => {
           if(!dupeExists) {
-            console.log('inside for loop!');
             const repoObj = { name: repo.name, html_url: repo.html_url, forks: repo.forks };
             Repo.create(repoObj);
           }
