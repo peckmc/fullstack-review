@@ -9,20 +9,42 @@ let repoSchema = mongoose.Schema({
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = async (repos) => {
-  await Repo.deleteMany({});
-  for (const repo of repos) {
-    const dupeExists = await Repo.exists({ html_url: repo.html_url }).exec();
-    if(!dupeExists) {
-      const repoObj = { name: repo.name, url: repo.html_url, forks: repo.forks };
-      await Repo.create(repoObj);
-    }
-  }
+let save = (repos) => {
+  const savePromise = new Promise(function (resolve, reject) {
+    Repo.deleteMany({})
+    .then(onDelete => {
+      for (const repo of repos) {
+        Repo.exists({ html_url: repo.html_url }).exec()
+        .then(dupeExists => {
+          if(!dupeExists) {
+            console.log('inside for loop!');
+            const repoObj = { name: repo.name, html_url: repo.html_url, forks: repo.forks };
+            Repo.create(repoObj);
+          }
+        })
+      }
+    })
+    .then(onceSaved => {
+      resolve();
+    })
+    .catch(err => {
+      console.log('save error', err);
+    })
+  });
+  return savePromise;
 }
 
-let getTop25 = async () => {
-  var results = await Repo.find().limit(25).sort('-forks').exec();
-  return results;
+let getTop25 = () => {
+  const top25Promise = new Promise(function (resolve, reject) {
+    Repo.find({}).limit(25).sort('-forks').exec()
+    .then(results => {
+      resolve(results);
+    })
+    .catch(err => {
+      console.log('top 25 error', err);
+    })
+  });
+  return top25Promise;
 }
 
 module.exports.save = save;

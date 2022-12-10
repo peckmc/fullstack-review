@@ -14,16 +14,8 @@ app.post('/repos', function (req, res) {
     repos = repoResults.data;
     save(repoResults.data);
   })
-  .then(ifSaved => {
-    res.send(repos);
-  })
-  .catch(err => {
-    console.log(err);
-  })
-});
 
-app.get('/repos', function (req, res) {
-  return getTop25()
+  getTop25()
   .then(results => {
     res.send(results);
   })
@@ -32,9 +24,20 @@ app.get('/repos', function (req, res) {
   })
 });
 
+app.get('/repos', function (req, res) {
+  // return getTop25()
+  // .then(results => {
+  //   res.send(results);
+  // })
+  // .catch(err => {
+  //   console.log(err);
+  // })
+});
+
 let port = 1128;
 
 app.listen(port, function() {
   console.log(`listening on port ${port}`);
 });
 
+41
