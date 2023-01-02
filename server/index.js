@@ -7,18 +7,15 @@ app.use(express.static('./client/dist'));
 app.use(express.json());
 
 app.post('/repos', function (req, res) {
-  var repoCount = 0;
-
   getReposByUsername(req.body.username)
   .then(repoResults => {
-    repoCount = repoResults.data.length;
     return save(repoResults.data);
   })
   .then(top25 => {
     res.status(200).send();
   })
   .catch(err => {
-    res.send('search error');
+    res.status(500).send('search error');
   })
 });
 
