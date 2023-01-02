@@ -9,33 +9,28 @@ let repoSchema = mongoose.Schema({
 
 let Repo = mongoose.model('Repo', repoSchema);
 
-let save = (repos) => {
-  const savePromise = new Promise(function (resolve, reject) {
-    Repo.deleteMany({})
-    .then(onDelete => {
-      for (const repo of repos) {
-        Repo.exists({ html_url: repo.html_url }).exec()
-        .then(dupeExists => {
-          if(!dupeExists) {
-            const repoObj = { name: repo.name, html_url: repo.html_url, forks: repo.forks };
-            Repo.create(repoObj);
-          }
-        })
-      }
+module.exports.save = (repos) => {
+  var promises = repos.map((repo) => {
+    return new Promise(function (resolve, reject) {
+      Repo.exists({ html_url: repo.html_url })
+      .then(dupeExists => {
+        if(!dupeExists) {
+          const repoObj = { name: repo.name, html_url: repo.html_url, forks: repo.forks };
+          Repo.create(repoObj);
+        }
+      })
+      .then(() => {
+        resolve();
+      })
+      .catch()
     })
-    .then(onceSaved => {
-      resolve();
-    })
-    .catch(err => {
-      console.log('save error', err);
-    })
-  });
-  return savePromise;
+  })
+  return Promise.all(promises);
 }
 
-let getTop25 = () => {
+module.exports.getTop25 = () => {
   const top25Promise = new Promise(function (resolve, reject) {
-    Repo.find({}).limit(25).sort('-forks').exec()
+    Repo.find({}).limit(25).sort('-forks')
     .then(results => {
       resolve(results);
     })
@@ -46,5 +41,15 @@ let getTop25 = () => {
   return top25Promise;
 }
 
-module.exports.save = save;
-module.exports.getTop25 = getTop25;
+module.exports.getRepoCount = () => {
+  const countPromise = new Promise(function (resolve, reject) {
+    Repo.count({})
+    .then(count => {
+      resolve(count);
+    })
+    .catch(err => {
+      console.log('top 25 error', err);
+    })
+  });
+  return countPromise;
+}

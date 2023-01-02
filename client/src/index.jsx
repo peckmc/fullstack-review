@@ -8,10 +8,34 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoading: true,
+      // searchLoading: true,
+      repoCount: 0,
       repos: []
     }
+    this.getRepos = this.getRepos.bind(this);
     this.search = this.search.bind(this);
     this.render = this.render.bind(this);
+  }
+
+  componentDidMount() {
+    this.getRepos();
+  }
+
+  getRepos() {
+    $.ajax({
+      url: 'http://localhost:1128/repos',
+      success: function(data) {
+        this.setState({
+          repoCount: data.repoCount,
+          repos: data.top25,
+          isLoading: false,
+        });
+      }.bind(this),
+      error: function(err) {
+        console.log(err);
+      }
+    })
   }
 
   search (term) {
@@ -21,9 +45,7 @@ class App extends React.Component {
       url: 'http://localhost:1128/repos',
       data: JSON.stringify({"username":term}),
       success: function(data) {
-        this.setState({
-          repos: data
-        });
+        this.getRepos();
       }.bind(this),
       error: function(err) {
         console.log(err);
@@ -34,23 +56,9 @@ class App extends React.Component {
   render () {
     return (<div>
       <h1>Github Fetcher</h1>
-      <RepoList repos={this.state.repos}/>
       <Search onSearch={this.search.bind(this)}/>
+      {!this.state.isLoading && !this.state.searchLoading && <RepoList repoCount={this.state.repoCount} top25={this.state.repos}/>}
       <br></br>
-      <table border='1' width='600'>
-          <tr>
-            <th>Name</th>
-            <th>Link</th>
-            <th># Forks</th>
-          </tr>
-        {this.state.repos.map((repo) => (
-          <tr>
-            <td>{repo.name}</td>
-            <td><a href={repo.html_url}>Link on GitHub</a></td>
-            <td>{repo.forks}</td>
-          </tr>
-      ))}
-    </table>
     </div>)
   }
 }
